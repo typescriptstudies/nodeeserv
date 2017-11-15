@@ -1,4 +1,3 @@
-#! /usr/bin/env node
 var Engine = /** @class */ (function () {
     function Engine() {
         this.name = "";
@@ -214,14 +213,19 @@ wss.on('connection', function connection(ws) {
                 if (e.config != "") {
                     issueCommand(e.config);
                 }
-                proc.stdout.on('data', function (data) {
-                    var str = data.toString().replace(new RegExp("[\r]", "g"), "");
-                    var lines = str.split("\n");
-                    lines.map(function (line) {
-                        if (line != "")
-                            current_ws.send("{\"action\":\"thinkingoutput\",\"buffer\":\"" + line + "\"}");
+                try {
+                    proc.stdout.on('data', function (data) {
+                        var str = data.toString().replace(new RegExp("[\r]", "g"), "");
+                        var lines = str.split("\n");
+                        lines.map(function (line) {
+                            if (line != "")
+                                current_ws.send("{\"action\":\"thinkingoutput\",\"buffer\":\"" + line + "\"}");
+                        });
                     });
-                });
+                }
+                catch (err) {
+                    console.log("could not add reader to process stdout");
+                }
             }
         }
         if (mjson.action == "issue") {
